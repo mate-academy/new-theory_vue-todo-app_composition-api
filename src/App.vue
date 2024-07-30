@@ -1,9 +1,13 @@
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import originalTodos from "./data/todos";
 
 const todos = ref(originalTodos);
 const title = ref("");
+
+const activeTodos = computed(() =>
+  todos.value.filter((todo) => !todo.completed)
+);
 
 function addTodo() {
   if (!title.value) return;
@@ -25,7 +29,11 @@ function addTodo() {
     <div class="todoapp__content">
       <header class="todoapp__header">
         <!-- this button should have `active` class only if all todos are completed -->
-        <button class="todoapp__toggle-all active"></button>
+        <button
+          v-if="todos.length > 0"
+          class="todoapp__toggle-all"
+          :class="{ active: activeTodos.length === 0 }"
+        ></button>
 
         <form @submit.prevent="addTodo">
           <input
@@ -36,9 +44,9 @@ function addTodo() {
         </form>
       </header>
 
-      <section class="todoapp__main">
+      <section class="todoapp__main" v-if="todos.length > 0">
         <div
-          v-for="todo, i of todos"
+          v-for="(todo, i) of todos"
           class="todo"
           :class="{ completed: todo.completed }"
         >
@@ -60,12 +68,7 @@ function addTodo() {
 
           <template v-else>
             <span class="todo__title">{{ todo.title }}</span>
-            <button
-              class="todo__remove"
-              @click="todos.splice(i, 1)"
-            >
-              ×
-            </button>
+            <button class="todo__remove" @click="todos.splice(i, 1)">×</button>
           </template>
 
           <!-- add `is-active` class when todo being processed -->
@@ -77,9 +80,9 @@ function addTodo() {
       </section>
 
       <!-- Hide the footer if there are no todos -->
-      <footer class="todoapp__footer">
+      <footer class="todoapp__footer" v-if="todos.length > 0">
         <!-- show the number of not caompleted todos -->
-        <span class="todo-count">3 items left</span>
+        <span class="todo-count">{{ activeTodos.length }} items left</span>
 
         <!-- Active link should have the 'selected' class -->
         <nav class="filter">
@@ -89,7 +92,10 @@ function addTodo() {
         </nav>
 
         <!-- this button should be disabled if there are no completed todos -->
-        <button class="todoapp__clear-completed">
+        <button
+          class="todoapp__clear-completed"
+          :disabled="todos.length === activeTodos.length"
+        >
           Clear completed
         </button>
       </footer>
@@ -100,11 +106,11 @@ function addTodo() {
     <div class="notification is-danger is-light has-text-weight-normal hidden">
       <button class="delete"></button>
       <!-- show only one message at a time -->
-      Unable to load todos<br>
-      Title should not be empty<br>
-      Unable to add a todo<br>
-      Unable to delete a todo<br>
-      Unable to update a todo<br>
+      Unable to load todos<br />
+      Title should not be empty<br />
+      Unable to add a todo<br />
+      Unable to delete a todo<br />
+      Unable to update a todo<br />
     </div>
   </div>
 </template>
