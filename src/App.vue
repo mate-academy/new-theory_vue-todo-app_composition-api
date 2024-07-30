@@ -1,5 +1,21 @@
 <script setup>
-import todos from "./data/todos";
+import { ref } from "vue";
+import originalTodos from "./data/todos";
+
+const todos = ref(originalTodos);
+const title = ref("");
+
+function addTodo() {
+  if (!title.value) return;
+
+  todos.value.push({
+    id: Date.now(),
+    title: title.value,
+    completed: false,
+  });
+
+  title.value = "";
+}
 </script>
 
 <template>
@@ -11,17 +27,18 @@ import todos from "./data/todos";
         <!-- this button should have `active` class only if all todos are completed -->
         <button class="todoapp__toggle-all active"></button>
 
-        <form>
+        <form @submit.prevent="addTodo">
           <input
             class="todoapp__new-todo"
             placeholder="What needs to be done?"
+            v-model="title"
           />
         </form>
       </header>
 
       <section class="todoapp__main">
         <div
-          v-for="todo of todos"
+          v-for="todo, i of todos"
           class="todo"
           :class="{ completed: todo.completed }"
         >
@@ -29,7 +46,7 @@ import todos from "./data/todos";
             <input
               type="checkbox"
               class="todo__status"
-              :checked="todo.completed"
+              v-model="todo.completed"
             />
           </label>
 
@@ -43,7 +60,12 @@ import todos from "./data/todos";
 
           <template v-else>
             <span class="todo__title">{{ todo.title }}</span>
-            <button class="todo__remove">×</button>
+            <button
+              class="todo__remove"
+              @click="todos.splice(i, 1)"
+            >
+              ×
+            </button>
           </template>
 
           <!-- add `is-active` class when todo being processed -->
