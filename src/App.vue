@@ -4,10 +4,23 @@ import originalTodos from "./data/todos";
 
 const todos = ref(originalTodos);
 const title = ref("");
+const status = ref("all");
 
 const activeTodos = computed(() =>
   todos.value.filter((todo) => !todo.completed)
 );
+
+const visibleTodos = computed(() => {
+  if (status.value === "active") {
+    return activeTodos.value;
+  }
+
+  if (status.value === "completed") {
+    return todos.value.filter((todo) => todo.completed);
+  }
+
+  return todos.value;
+});
 
 function addTodo() {
   if (!title.value) return;
@@ -46,7 +59,7 @@ function addTodo() {
 
       <section class="todoapp__main" v-if="todos.length > 0">
         <div
-          v-for="(todo, i) of todos"
+          v-for="(todo, i) of visibleTodos"
           class="todo"
           :class="{ completed: todo.completed }"
         >
@@ -79,19 +92,36 @@ function addTodo() {
         </div>
       </section>
 
-      <!-- Hide the footer if there are no todos -->
       <footer class="todoapp__footer" v-if="todos.length > 0">
-        <!-- show the number of not caompleted todos -->
         <span class="todo-count">{{ activeTodos.length }} items left</span>
 
-        <!-- Active link should have the 'selected' class -->
         <nav class="filter">
-          <a href="#/" class="filter__link selected">All</a>
-          <a href="#/active" class="filter__link">Active</a>
-          <a href="#/completed" class="filter__link">Completed</a>
+          <a
+            href="#/"
+            class="filter__link"
+            :class="{ selected: status === 'all' }"
+            @click="status = 'all'"
+          >
+            All
+          </a>
+          <a
+            href="#/active"
+            class="filter__link"
+            :class="{ selected: status === 'active' }"
+            @click="status = 'active'"
+          >
+            Active
+          </a>
+          <a
+            href="#/completed"
+            class="filter__link"
+            :class="{ selected: status === 'completed' }"
+            @click="status = 'completed'"
+          >
+            Completed
+          </a>
         </nav>
 
-        <!-- this button should be disabled if there are no completed todos -->
         <button
           class="todoapp__clear-completed"
           :disabled="todos.length === activeTodos.length"
