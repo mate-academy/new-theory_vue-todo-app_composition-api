@@ -1,5 +1,6 @@
 <script setup>
 import StatusFilter from "./components/StatusFilter.vue";
+import TodoItem from "./components/TodoItem.vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
 const title = ref("");
@@ -75,38 +76,16 @@ function addTodo() {
       </header>
 
       <section class="todoapp__main" v-if="todos.length > 0">
-        <div
-          v-for="(todo, i) of visibleTodos"
-          class="todo"
-          :class="{ completed: todo.completed }"
-        >
-          <label class="todo__status-label">
-            <input
-              type="checkbox"
-              class="todo__status"
-              v-model="todo.completed"
-            />
-          </label>
-
-          <!-- show when todo is being edited -->
-          <form v-if="false">
-            <input
-              class="todo__title-field"
-              placeholder="Empty todo will be deleted"
-            />
-          </form>
-
-          <template v-else>
-            <span class="todo__title">{{ todo.title }}</span>
-            <button class="todo__remove" @click="todos.splice(i, 1)">×</button>
-          </template>
-
-          <!-- add `is-active` class when todo being processed -->
-          <div class="modal overlay" :class="{ 'is-active': false }">
-            <div class="modal-background has-background-white-ter"></div>
-            <div class="loader"></div>
-          </div>
-        </div>
+        <TodoItem
+          v-for="todo in visibleTodos"
+          :key="todo.id"
+          :todo="todo"
+          @delete="todos = todos.filter(({ id }) => todo.id !== id)"
+          @update="(updatedTodo) => {
+            const index = todos.findIndex(({ id }) => todo.id === id);
+            todos[index] = updatedTodo;
+          }"
+        />
       </section>
 
       <footer class="todoapp__footer" v-if="todos.length > 0">
