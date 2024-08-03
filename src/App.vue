@@ -1,10 +1,26 @@
 <script setup>
-import { computed, ref } from "vue";
-import originalTodos from "./data/todos";
+import { computed, onBeforeMount, ref, watch } from "vue";
 
-const todos = ref(originalTodos);
 const title = ref("");
 const status = ref("all");
+const todos = ref();
+
+onBeforeMount(() => {
+  try {
+    const value = localStorage.getItem("todos");
+    todos.value = value ? JSON.parse(value) : [];
+  } catch (error) {
+    todos.value = [];
+  }
+});
+
+watch(
+  todos,
+  (newTodos) => {
+    localStorage.setItem("todos", JSON.stringify(newTodos));
+  },
+  { deep: true }
+);
 
 const activeTodos = computed(() =>
   todos.value.filter((todo) => !todo.completed)
