@@ -1,4 +1,5 @@
 <script setup>
+import StatusFilter from "./components/StatusFilter.vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
 const title = ref("");
@@ -111,32 +112,7 @@ function addTodo() {
       <footer class="todoapp__footer" v-if="todos.length > 0">
         <span class="todo-count">{{ activeTodos.length }} items left</span>
 
-        <nav class="filter">
-          <a
-            href="#/"
-            class="filter__link"
-            :class="{ selected: status === 'all' }"
-            @click="status = 'all'"
-          >
-            All
-          </a>
-          <a
-            href="#/active"
-            class="filter__link"
-            :class="{ selected: status === 'active' }"
-            @click="status = 'active'"
-          >
-            Active
-          </a>
-          <a
-            href="#/completed"
-            class="filter__link"
-            :class="{ selected: status === 'completed' }"
-            @click="status = 'completed'"
-          >
-            Completed
-          </a>
-        </nav>
+        <StatusFilter v-model="status" />
 
         <button
           class="todoapp__clear-completed"
