@@ -1,28 +1,16 @@
 <script setup>
+import { computed, onMounted, ref, TransitionGroup, watch } from "vue";
 import StatusFilter from "./components/StatusFilter.vue";
 import TodoItem from "./components/TodoItem.vue";
-import { computed, onBeforeMount, ref, TransitionGroup, watch } from "vue";
+import * as todoApi from "./api/todos";
 
 const title = ref("");
 const status = ref("all");
-const todos = ref();
+const todos = ref([]);
 
-onBeforeMount(() => {
-  try {
-    const value = localStorage.getItem("todos");
-    todos.value = value ? JSON.parse(value) : [];
-  } catch (error) {
-    todos.value = [];
-  }
+onMounted(async () => {
+  todos.value = await todoApi.getTodos();
 });
-
-watch(
-  todos,
-  (newTodos) => {
-    localStorage.setItem("todos", JSON.stringify(newTodos));
-  },
-  { deep: true }
-);
 
 const activeTodos = computed(() =>
   todos.value.filter((todo) => !todo.completed)
@@ -40,17 +28,26 @@ const visibleTodos = computed(() => {
   return todos.value;
 });
 
-function addTodo() {
+const addTodo = async () => {
   if (!title.value) return;
 
-  todos.value.push({
-    id: Date.now(),
-    title: title.value,
-    completed: false,
-  });
+  const newTodo = await todoApi.createTodo(title.value);
 
+  todos.value.push(newTodo);
   title.value = "";
-}
+};
+
+const updateTodo = async ({ id, title, completed }) => {
+  const updatedTodo = await todoApi.updateTodo({ id, title, completed });
+  const currentTodo = todos.value.find((todo) => todo.id === id);
+
+  Object.assign(currentTodo, updatedTodo);
+};
+
+const deleteTodo = async (todoId) => {
+  await todoApi.deleteTodo(todoId);
+  todos.value = todos.value.filter((todo) => todoId !== todo.id)
+};
 </script>
 
 <template>
@@ -85,8 +82,8 @@ function addTodo() {
           v-for="todo of visibleTodos"
           :key="todo.id"
           :todo="todo"
-          @delete="todos.splice(todos.indexOf(todo), 1)"
-          @update="Object.assign(todo, $event)"
+          @delete="deleteTodo(todo.id)"
+          @update="updateTodo($event)"
         />
       </TransitionGroup>
 
