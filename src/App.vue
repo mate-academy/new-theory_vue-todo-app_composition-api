@@ -1,7 +1,7 @@
 <script setup>
 import StatusFilter from "./components/StatusFilter.vue";
 import TodoItem from "./components/TodoItem.vue";
-import { computed, onBeforeMount, ref, watch } from "vue";
+import { computed, onBeforeMount, ref, TransitionGroup, watch } from "vue";
 
 const title = ref("");
 const status = ref("all");
@@ -75,7 +75,12 @@ function addTodo() {
         </form>
       </header>
 
-      <section class="todoapp__main" v-if="todos.length > 0">
+      <TransitionGroup
+        tag="section"
+        name="todolist"
+        class="todoapp__main"
+        v-if="todos.length > 0"
+      >
         <TodoItem
           v-for="todo of visibleTodos"
           :key="todo.id"
@@ -83,7 +88,7 @@ function addTodo() {
           @delete="todos.splice(todos.indexOf(todo), 1)"
           @update="Object.assign(todo, $event)"
         />
-      </section>
+      </TransitionGroup>
 
       <footer class="todoapp__footer" v-if="todos.length > 0">
         <span class="todo-count">{{ activeTodos.length }} items left</span>
@@ -112,3 +117,17 @@ function addTodo() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.todolist-enter-active,
+.todolist-leave-active {
+  max-height: 60px;
+  transition: all 0.5s ease;
+}
+.todolist-enter-from,
+.todolist-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: scaleY(0);
+}
+</style>
