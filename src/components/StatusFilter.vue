@@ -1,10 +1,6 @@
 <script setup>
-import { defineProps, defineEmits } from "vue";
-
-const emit = defineEmits(["update:modelValue"]);
-const { modelValue } = defineProps({
-  modelValue: String,
-});
+defineEmits(["update:modelValue"]);
+defineProps({ modelValue: String });
 </script>
 
 <template>
@@ -13,7 +9,7 @@ const { modelValue } = defineProps({
       href="#/"
       class="filter__link"
       :class="{ selected: modelValue === 'all' }"
-      @click="emit('update:modelValue', 'all')"
+      @click="$emit('update:modelValue', 'all')"
     >
       All
     </a>
@@ -21,7 +17,7 @@ const { modelValue } = defineProps({
       href="#/active"
       class="filter__link"
       :class="{ selected: modelValue === 'active' }"
-      @click="emit('update:modelValue', 'active')"
+      @click="$emit('update:modelValue', 'active')"
     >
       Active
     </a>
@@ -29,7 +25,7 @@ const { modelValue } = defineProps({
       href="#/completed"
       class="filter__link"
       :class="{ selected: modelValue === 'completed' }"
-      @click="emit('update:modelValue', 'completed')"
+      @click="$emit('update:modelValue', 'completed')"
     >
       Completed
     </a>

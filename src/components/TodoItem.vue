@@ -1,8 +1,9 @@
 <script setup>
-import { defineProps, defineEmits, ref, nextTick, toRefs } from "vue";
+import { ref, nextTick } from "vue";
 
-const props = defineProps(["todo"]);
 const emit = defineEmits(["delete", "update"]);
+const props = defineProps(["todo"]);
+
 const editing = ref(false);
 const titleField = ref(null);
 const newTitle = ref(props.todo.title);

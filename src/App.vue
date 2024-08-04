@@ -3,13 +3,19 @@ import { computed, onMounted, ref, TransitionGroup, watch } from "vue";
 import StatusFilter from "./components/StatusFilter.vue";
 import TodoItem from "./components/TodoItem.vue";
 import * as todoApi from "./api/todos";
+import Message from "./components/Message.vue";
 
 const title = ref("");
 const status = ref("all");
 const todos = ref([]);
+const errorMessage = ref("");
 
 onMounted(async () => {
-  todos.value = await todoApi.getTodos();
+  try {
+    todos.value = await todoApi.getTodos();
+  } catch (error) {
+    errorMessage.value = "Unable to load todos";
+  }
 });
 
 const activeTodos = computed(() =>
@@ -29,24 +35,39 @@ const visibleTodos = computed(() => {
 });
 
 const addTodo = async () => {
-  if (!title.value) return;
+  if (!title.value) {
+    errorMessage.value = "Title should not be empty";
+    return;
+  }
 
-  const newTodo = await todoApi.createTodo(title.value);
+  try {
+    const newTodo = await todoApi.createTodo(title.value);
 
-  todos.value.push(newTodo);
-  title.value = "";
+    todos.value.push(newTodo);
+    title.value = "";
+  } catch (error) {
+    errorMessage.value = "Unable to add a todo";
+  }
 };
 
 const updateTodo = async ({ id, title, completed }) => {
-  const updatedTodo = await todoApi.updateTodo({ id, title, completed });
-  const currentTodo = todos.value.find((todo) => todo.id === id);
+  try {
+    const updatedTodo = await todoApi.updateTodo({ id, title, completed });
+    const currentTodo = todos.value.find((todo) => todo.id === id);
 
-  Object.assign(currentTodo, updatedTodo);
+    Object.assign(currentTodo, updatedTodo);
+  } catch (error) {
+    errorMessage.value = "Unable to update a todo";
+  }
 };
 
 const deleteTodo = async (todoId) => {
-  await todoApi.deleteTodo(todoId);
-  todos.value = todos.value.filter((todo) => todoId !== todo.id)
+  try {
+    await todoApi.deleteTodo(todoId);
+    todos.value = todos.value.filter((todo) => todoId !== todo.id);
+  } catch (error) {
+    errorMessage.value = "Unable to delete a todo";
+  }
 };
 </script>
 
@@ -101,17 +122,15 @@ const deleteTodo = async (todoId) => {
       </footer>
     </div>
 
-    <!-- DON'T use conditional rendering to hide the notification -->
-    <!-- Add the 'hidden' class to hide the message smoothly -->
-    <div class="notification is-danger is-light has-text-weight-normal hidden">
-      <button class="delete"></button>
-      <!-- show only one message at a time -->
-      Unable to load todos<br />
-      Title should not be empty<br />
-      Unable to add a todo<br />
-      Unable to delete a todo<br />
-      Unable to update a todo<br />
-    </div>
+    <Message class="is-danger" :hidden="!errorMessage">
+      <template #header>
+        <p>Server Error</p>
+      </template>
+
+      <template #default>
+        <p>{{ errorMessage }}</p>
+      </template>
+    </Message>
   </div>
 </template>
 
