@@ -77,14 +77,11 @@ function addTodo() {
 
       <section class="todoapp__main" v-if="todos.length > 0">
         <TodoItem
-          v-for="todo in visibleTodos"
+          v-for="todo of visibleTodos"
           :key="todo.id"
           :todo="todo"
-          @delete="todos = todos.filter(({ id }) => todo.id !== id)"
-          @update="(updatedTodo) => {
-            const index = todos.findIndex(({ id }) => todo.id === id);
-            todos[index] = updatedTodo;
-          }"
+          @delete="todos.splice(todos.indexOf(todo), 1)"
+          @update="Object.assign(todo, $event)"
         />
       </section>
 

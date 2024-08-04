@@ -1,13 +1,14 @@
 <script setup>
-import { defineProps, defineEmits, ref, nextTick } from "vue";
+import { defineProps, defineEmits, ref, nextTick, toRefs } from "vue";
 
-const { todo } = defineProps(["todo"]);
+const props = defineProps(["todo"]);
 const emit = defineEmits(["delete", "update"]);
 const editing = ref(false);
 const titleField = ref(null);
-const newTitle = ref(todo.title);
+const newTitle = ref(props.todo.title);
 
 const startEditing = async () => {
+  newTitle.value = props.todo.title;
   editing.value = true;
 
   await nextTick();
@@ -18,8 +19,20 @@ const startEditing = async () => {
 };
 
 const rename = () => {
+  if (!editing.value) return;
+
   editing.value = false;
-  emit("update", { ...todo, title: newTitle.value });
+
+  if (newTitle.value === props.todo.title) {
+    return;
+  }
+
+  if (!newTitle.value) {
+    emit("delete");
+    return;
+  }
+
+  emit("update", { ...props.todo, title: newTitle.value });
 };
 </script>
 
@@ -29,7 +42,7 @@ const rename = () => {
       <input
         type="checkbox"
         class="todo__status"
-        checked="todo.completed"
+        :checked="todo.completed"
         @change="emit('update', { ...todo, completed: !todo.completed })"
       />
     </label>
@@ -38,7 +51,8 @@ const rename = () => {
     <form v-if="editing" @submit.prevent="rename">
       <input
         ref="titleField"
-        v-model="newTitle"
+        v-model.trim="newTitle"
+        @blur="rename"
         @keyup.escape="editing = false"
         class="todo__title-field"
         placeholder="Empty todo will be deleted"
