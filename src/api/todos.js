@@ -5,7 +5,6 @@ const USER_ID = 1134;
 export const getTodos = async () => {
   const response = await client.get(`/todos?userId=${USER_ID}`);
 
-  throw new Error("Error message");
   return response.data;
 };
 

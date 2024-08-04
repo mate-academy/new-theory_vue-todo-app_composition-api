@@ -8,13 +8,13 @@ import Message from "./components/Message.vue";
 const title = ref("");
 const status = ref("all");
 const todos = ref([]);
-const errorMessage = ref("");
+const errorMessage = ref(null);
 
 onMounted(async () => {
   try {
     todos.value = await todoApi.getTodos();
   } catch (error) {
-    errorMessage.value = "Unable to load todos";
+    errorMessage.value.show("Unable to load todos");
   }
 });
 
@@ -36,7 +36,7 @@ const visibleTodos = computed(() => {
 
 const addTodo = async () => {
   if (!title.value) {
-    errorMessage.value = "Title should not be empty";
+    errorMessage.value.show("Title should not be empty");
     return;
   }
 
@@ -46,7 +46,7 @@ const addTodo = async () => {
     todos.value.push(newTodo);
     title.value = "";
   } catch (error) {
-    errorMessage.value = "Unable to add a todo";
+    errorMessage.value.show("Unable to add a todo");
   }
 };
 
@@ -57,7 +57,7 @@ const updateTodo = async ({ id, title, completed }) => {
 
     Object.assign(currentTodo, updatedTodo);
   } catch (error) {
-    errorMessage.value = "Unable to update a todo";
+    errorMessage.value.show("Unable to update a todo");
   }
 };
 
@@ -66,7 +66,7 @@ const deleteTodo = async (todoId) => {
     await todoApi.deleteTodo(todoId);
     todos.value = todos.value.filter((todo) => todoId !== todo.id);
   } catch (error) {
-    errorMessage.value = "Unable to delete a todo";
+    errorMessage.value.show("Unable to delete a todo");
   }
 };
 </script>
@@ -122,13 +122,13 @@ const deleteTodo = async (todoId) => {
       </footer>
     </div>
 
-    <Message class="is-danger" :hidden="!errorMessage">
+    <Message class="is-danger" ref="errorMessage">
       <template #header>
         <p>Server Error</p>
       </template>
 
-      <template #default>
-        <p>{{ errorMessage }}</p>
+      <template #default="{ text }">
+        <p>{{ text }}</p>
       </template>
     </Message>
   </div>
